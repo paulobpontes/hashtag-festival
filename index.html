@@ -4,19 +4,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HASHTAG FESTIVAL</title>
+<title>Hashtag Festival | Contagem Oficial</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-:root{
+:root {
   --red:#f21d32;
   --dark:#080808;
   --white:#fff;
-  --muted:#999;
 }
 *{box-sizing:border-box}
 body{
-  margin:0;background:var(--dark);color:white;
+  margin:0;
+  background:var(--dark);
+  color:white;
   font-family:Arial,Helvetica,sans-serif;
 }
 button,input{font:inherit}
@@ -42,9 +43,9 @@ button{cursor:pointer}
   inset:0;
   pointer-events:none;
   opacity:.18;
-  background:
-    repeating-linear-gradient(135deg,
-    transparent 0 42px,#ffffff12 43px 44px);
+  background:repeating-linear-gradient(
+    135deg,transparent 0 42px,#ffffff12 43px 44px
+  );
 }
 #screen:after{
   content:"";
@@ -54,7 +55,7 @@ button{cursor:pointer}
   border:clamp(5px,.7vw,12px) solid #f21d3220;
   box-shadow:inset 0 0 100px #f21d3215;
 }
-.topbar,.main-content,.bottom-content{
+.topbar,.main-content,.bottom-content,.footer{
   position:relative;
   z-index:1;
 }
@@ -64,19 +65,24 @@ button{cursor:pointer}
   align-items:flex-start;
   gap:20px;
 }
-.logo{
-  font-size:clamp(38px,7vw,100px);
-  font-weight:1000;
-  font-style:italic;
-  letter-spacing:-.075em;
-  line-height:.8;
-  text-shadow:5px 5px 0 #8d0715;
+.brand-area{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
 }
-.logo span{color:var(--red)}
+.brand-logo{
+  display:block;
+  width:clamp(95px,11vw,175px);
+  height:auto;
+  aspect-ratio:1;
+  object-fit:contain;
+  border-radius:50%;
+  box-shadow:0 0 28px #f21d3230;
+}
 .logo-caption{
-  margin-top:13px;
-  font-size:clamp(10px,1.25vw,20px);
-  letter-spacing:.45em;
+  margin-top:12px;
+  font-size:clamp(10px,1.15vw,18px);
+  letter-spacing:.35em;
   font-weight:900;
   color:#ddd;
 }
@@ -93,7 +99,8 @@ button{cursor:pointer}
   letter-spacing:.2em;
 }
 .live-dot{
-  width:13px;height:13px;
+  width:13px;
+  height:13px;
   background:#ff233b;
   border-radius:50%;
   box-shadow:0 0 18px #ff233b;
@@ -150,13 +157,13 @@ button{cursor:pointer}
 }
 .digit-strip{
   position:absolute;
-  top:0;left:0;
+  top:0;
+  left:0;
   width:100%;
   height:1000%;
   display:flex;
   flex-direction:column;
-  transform:translateY(calc(var(--digit) * -10%));
-  transition:transform .8s cubic-bezier(.2,.75,.25,1);
+  transition:transform .85s cubic-bezier(.2,.75,.25,1);
 }
 .digit-strip span{
   display:flex;
@@ -164,12 +171,6 @@ button{cursor:pointer}
   justify-content:center;
   height:10%;
   flex:0 0 10%;
-}
-.separator{
-  color:var(--red);
-  font-size:.65em;
-  padding:0 .015em;
-  transform:translateY(-.05em);
 }
 .counter-label{
   color:white;
@@ -213,8 +214,6 @@ button{cursor:pointer}
   text-transform:uppercase;
 }
 .footer{
-  position:relative;
-  z-index:1;
   display:flex;
   justify-content:space-between;
   align-items:center;
@@ -237,7 +236,10 @@ button{cursor:pointer}
   padding:5vw;
   background:radial-gradient(circle,#ed2338f5,#76000ff5);
 }
-.celebration.show{display:flex;animation:celebrateIn .5s ease}
+.celebration.show{
+  display:flex;
+  animation:celebrateIn .5s ease;
+}
 @keyframes celebrateIn{
   from{opacity:0;transform:scale(1.12)}
   to{opacity:1;transform:scale(1)}
@@ -271,14 +273,13 @@ button{cursor:pointer}
   top:-30px;
   width:10px;
   height:20px;
-  background:white;
   animation:fall 3s linear forwards;
 }
 @keyframes fall{
   to{transform:translateY(110vh) rotate(800deg);opacity:0}
 }
 
-/* PAINEL */
+/* PAINEL ADMINISTRATIVO */
 #control{
   max-width:760px;
   margin:auto;
@@ -353,7 +354,7 @@ input{
 @media(max-width:600px){
   #screen{padding:4vh 4vw}
   .odometer{font-size:18vw}
-  .logo{font-size:42px}
+  .brand-logo{width:95px}
   .live{padding:9px 12px}
   .logo-caption{letter-spacing:.2em}
   .counter-label{letter-spacing:.15em}
@@ -365,10 +366,15 @@ input{
 
 <section id="screen" class="hidden">
   <header class="topbar">
-    <div>
-      <div class="logo">HASHTAG<span>!</span></div>
+    <div class="brand-area">
+      <img
+        class="brand-logo"
+        src="./logo-hashtag.png"
+        alt="Logomarca oficial Hashtag Festival"
+      >
       <div class="logo-caption">FESTIVAL • STREET FOOD</div>
     </div>
+
     <div class="live">
       <span class="live-dot"></span>
       AO VIVO
@@ -455,7 +461,7 @@ input{
 
 <script>
 const SUPABASE_URL="https://gpbtzxhulrsydextmlqj.supabase.co";
-const SUPABASE_KEY="sb_publishable_A-5ckTc0wT87BU75QdbKPw_YFotR1wW";
+const SUPABASE_KEY="sb_publishable_A-5ckTc0wT87BU75QdbKPw_YFotR1w";
 const FUNCTION_URL=SUPABASE_URL+"/functions/v1/festival-control";
 
 const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
@@ -473,6 +479,8 @@ let animationTimer=null;
 let token=sessionStorage.getItem("festival_token");
 let lastDelta=null;
 let celebrated=new Set();
+let digitElements=[];
+let odometerLength=0;
 
 const milestones={
   1000:"A FOME COMEÇOU!",
@@ -496,33 +504,51 @@ const phrases=[
   "QUEM PROVOU, VOLTOU!",
   "A CHAPA TÁ VOANDO!",
   "É HAMBÚRGUER PRA TODO LADO!",
-  "SEGURA ESSA FOME!",
-  "O HASHTAG NÃO PARA!"
+  "SEGURA ESSA FOME!"
 ];
+
+function buildOdometer(length){
+  odometer.innerHTML="";
+  digitElements=[];
+
+  for(let i=0;i<length;i++){
+    const windowDigit=document.createElement("span");
+    windowDigit.className="digit-window";
+
+    const strip=document.createElement("span");
+    strip.className="digit-strip";
+
+    for(let n=0;n<=9;n++){
+      const digit=document.createElement("span");
+      digit.textContent=n;
+      strip.appendChild(digit);
+    }
+
+    windowDigit.appendChild(strip);
+    odometer.appendChild(windowDigit);
+    digitElements.push(strip);
+  }
+
+  odometerLength=length;
+}
 
 function renderDigits(value){
   const digits=String(Math.max(0,value)).padStart(6,"0");
-  let html="";
+
+  if(digits.length!==odometerLength){
+    buildOdometer(digits.length);
+  }
 
   for(let i=0;i<digits.length;i++){
     const digit=Number(digits[i]);
-    html+=`
-      <span class="digit-window">
-        <span class="digit-strip" style="--digit:${digit}">
-          ${[0,1,2,3,4,5,6,7,8,9].map(n=>`<span>${n}</span>`).join("")}
-        </span>
-      </span>`;
-    const remaining=digits.length-i-1;
-    if(remaining>0 && remaining%3===0){
-      html+='<span class="separator">,</span>';
-    }
+    digitElements[i].style.transform=`translateY(-${digit*10}%)`;
   }
-  odometer.innerHTML=html;
 }
 
 function render(){
   renderDigits(displayedTotal);
   panelTotal.textContent=actualTotal.toLocaleString("pt-BR");
+
   document.getElementById("progressFill").style.width=
     Math.min(actualTotal/3000*100,100)+"%";
 }
@@ -536,10 +562,14 @@ function updatePhrase(value){
 
 function celebrate(value){
   if(!milestones[value] || celebrated.has(value))return;
+
   celebrated.add(value);
 
   const box=document.getElementById("celebration");
-  document.getElementById("celebrationTitle").textContent=milestones[value];
+
+  document.getElementById("celebrationTitle").textContent=
+    milestones[value];
+
   document.getElementById("celebrationSubtitle").textContent=
     value.toLocaleString("pt-BR")+" HAMBÚRGUERES VENDIDOS!";
 
@@ -552,14 +582,16 @@ function celebrate(value){
 
 function createConfetti(){
   const box=document.getElementById("celebration");
+
   for(let i=0;i<100;i++){
-    const p=document.createElement("span");
-    p.className="particle";
-    p.style.left=Math.random()*100+"%";
-    p.style.animationDelay=Math.random()*1.5+"s";
-    p.style.background=["#fff","#ffd447","#ff263e"][i%3];
-    box.appendChild(p);
-    setTimeout(()=>p.remove(),4500);
+    const particle=document.createElement("span");
+    particle.className="particle";
+    particle.style.left=Math.random()*100+"%";
+    particle.style.animationDelay=Math.random()*1.5+"s";
+    particle.style.background=["#fff","#ffd447","#ff263e"][i%3];
+
+    box.appendChild(particle);
+    setTimeout(()=>particle.remove(),4500);
   }
 }
 
@@ -585,7 +617,9 @@ function animateCount(){
 
 async function loadTotal(){
   const {data,error}=await db.from("festival_counter")
-    .select("total").eq("id",true).single();
+    .select("total")
+    .eq("id",true)
+    .single();
 
   if(error){
     setStatus("Erro ao carregar: "+error.message);
@@ -613,9 +647,11 @@ db.channel("hashtag-festival-live")
     filter:"id=eq.true"
   },payload=>{
     const next=Number(payload.new.total)||0;
+
     if(next>actualTotal){
       actualTotal=next;
       render();
+
       if(isScreen)animateCount();
     }else{
       actualTotal=next;
@@ -631,6 +667,7 @@ db.channel("hashtag-festival-live")
 
 async function callFunction(body,useToken=true){
   const headers={"Content-Type":"application/json"};
+
   if(useToken && token){
     headers.Authorization="Bearer "+token;
   }
@@ -641,8 +678,14 @@ async function callFunction(body,useToken=true){
     body:JSON.stringify(body)
   });
 
-  const result=await response.json().catch(()=>({error:"Resposta inválida"}));
-  if(!response.ok)throw new Error(result.error||"Falha na operação");
+  const result=await response.json().catch(
+    ()=>({error:"Resposta inválida"})
+  );
+
+  if(!response.ok){
+    throw new Error(result.error||"Falha na operação");
+  }
+
   return result;
 }
 
@@ -655,16 +698,20 @@ async function login(){
 
   try{
     const result=await callFunction(
-      {action:"login",username,password},false
+      {action:"login",username,password},
+      false
     );
 
-    if(!result.token)throw new Error("Token não recebido.");
+    if(!result.token){
+      throw new Error("Token não recebido.");
+    }
 
     token=result.token;
     sessionStorage.setItem("festival_token",token);
 
     document.getElementById("loginCard").classList.add("hidden");
     document.getElementById("admin").classList.remove("hidden");
+
     error.textContent="";
     setStatus("Acesso autorizado.");
   }catch(e){
@@ -685,12 +732,16 @@ async function changeTotal(delta){
 
   try{
     const result=await callFunction({action:"increment",delta});
+
     lastDelta=delta;
 
     if(typeof result.total==="number"){
       actualTotal=result.total;
       render();
-      if(isScreen && actualTotal>displayedTotal)animateCount();
+
+      if(isScreen && actualTotal>displayedTotal){
+        animateCount();
+      }
     }
 
     setStatus("Alteração registrada.");
@@ -714,10 +765,12 @@ document.querySelectorAll("[data-delta]").forEach(button=>{
 
 document.getElementById("customBtn").addEventListener("click",()=>{
   const amount=Number(document.getElementById("customAmount").value);
+
   if(!Number.isInteger(amount)||amount<1||amount>500){
     alert("Digite um número entre 1 e 500.");
     return;
   }
+
   changeTotal(amount);
   document.getElementById("customAmount").value="";
 });
@@ -733,6 +786,7 @@ document.getElementById("undoBtn").addEventListener("click",()=>{
   }
 
   const inverse=-lastDelta;
+
   if(actualTotal+inverse<0){
     alert("Não é possível desfazer.");
     return;
@@ -745,11 +799,13 @@ document.getElementById("undoBtn").addEventListener("click",()=>{
 document.getElementById("logoutBtn").addEventListener("click",()=>{
   token=null;
   lastDelta=null;
+
   sessionStorage.removeItem("festival_token");
 
   document.getElementById("admin").classList.add("hidden");
   document.getElementById("loginCard").classList.remove("hidden");
   document.getElementById("password").value="";
+
   setStatus("Sessão encerrada.");
 });
 
