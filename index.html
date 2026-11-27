@@ -1,0 +1,440 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hashtag Festival | Contador Oficial</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root {
+  --red:#ff2638;
+  --black:#080808;
+  --white:#fff;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--black);color:var(--white);
+  font-family:Arial,Helvetica,sans-serif;
+}
+button,input{font:inherit}
+button{cursor:pointer}
+.screen{
+  min-height:100vh;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;
+  padding:3vw;overflow:hidden;position:relative;
+  background:
+    radial-gradient(ellipse at center,#351014 0%,#13090b 48%,#050505 100%);
+}
+.screen:before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(135deg,transparent 0 30px,#ffffff05 31px 32px);
+}
+.live{
+  position:absolute;top:4%;right:4%;display:flex;align-items:center;
+  gap:10px;font-weight:900;letter-spacing:3px;font-size:clamp(13px,2vw,25px);
+}
+.dot{
+  width:13px;height:13px;border-radius:50%;background:#ff2638;
+  box-shadow:0 0 18px #ff2638;animation:pulse 1s infinite;
+}
+@keyframes pulse{50%{opacity:.3;transform:scale(.7)}}
+.brand{
+  font-weight:1000;font-style:italic;letter-spacing:-4px;
+  font-size:clamp(45px,10vw,130px);line-height:.9;
+  text-shadow:5px 5px 0 #9d101d;
+}
+.brand span{color:var(--red)}
+.subtitle{
+  color:#ddd;font-weight:900;letter-spacing:clamp(3px,1vw,10px);
+  font-size:clamp(12px,2vw,25px);margin-top:15px;
+}
+.counter{
+  font-size:clamp(100px,27vw,390px);font-weight:1000;
+  letter-spacing:-.07em;line-height:1;margin:2vh 0;
+  font-variant-numeric:tabular-nums;
+  text-shadow:0 0 35px #ff263855,0 8px 0 #7c111c;
+}
+.counter.bump{animation:bump .25s ease}
+@keyframes bump{50%{transform:scale(1.035)}}
+.goal{
+  font-size:clamp(17px,3vw,38px);font-weight:900;
+  letter-spacing:4px;color:#ffb8bd;
+}
+.progress{
+  width:min(75vw,1000px);height:15px;background:#ffffff20;
+  border-radius:30px;overflow:hidden;margin-top:20px;
+}
+.progress div{
+  height:100%;width:0;background:linear-gradient(90deg,#a90014,#ff3345);
+  transition:width .5s;
+}
+.phrase{
+  min-height:55px;margin-top:25px;font-size:clamp(17px,3vw,38px);
+  font-weight:900;text-transform:uppercase;color:#fff;
+}
+.celebration{
+  position:absolute;inset:0;display:none;align-items:center;
+  justify-content:center;flex-direction:column;z-index:5;
+  background:#b90019e8;animation:flash .5s infinite alternate;
+  padding:20px;
+}
+.celebration.show{display:flex}
+.celebration strong{
+  font-size:clamp(38px,9vw,115px);font-weight:1000;
+  text-shadow:5px 5px #62000c;
+}
+.celebration small{font-size:clamp(20px,4vw,45px);margin-top:20px}
+@keyframes flash{to{background:#8c0015ed}}
+.confetti{
+  position:absolute;top:-20px;width:10px;height:18px;
+  background:#fff;animation:fall 2.5s linear forwards;
+}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg);opacity:0}}
+.panel{
+  min-height:100vh;padding:25px 16px;max-width:700px;margin:auto;
+}
+.panel h1{font-size:36px;font-weight:1000;font-style:italic}
+.panel h1 span{color:var(--red)}
+.panel-card{
+  background:#171717;border:1px solid #333;border-radius:18px;
+  padding:22px;margin:18px 0;
+}
+.panel-total{font-size:65px;font-weight:1000;text-align:center}
+.muted{color:#aaa;text-align:center}
+.grid{
+  display:grid;grid-template-columns:repeat(2,1fr);gap:12px;
+}
+.action{
+  border:0;border-radius:12px;background:var(--red);color:white;
+  font-weight:1000;padding:20px;font-size:22px;
+}
+.action.secondary{background:#303030}
+.action.danger{background:#7c111c}
+.action:disabled{opacity:.4;cursor:not-allowed}
+input{
+  width:100%;padding:15px;border-radius:10px;border:1px solid #555;
+  background:#090909;color:#fff;margin:8px 0;
+}
+.full{width:100%;margin-top:10px}
+.hidden{display:none!important}
+.status{text-align:center;color:#aaa;font-size:13px;margin-top:15px}
+</style>
+</head>
+<body>
+
+<div id="screen" class="screen hidden">
+  <div class="live"><span class="dot"></span> AO VIVO</div>
+  <div class="brand">HASHTAG<span>!</span></div>
+  <div class="subtitle">FESTIVAL • CONTAGEM OFICIAL</div>
+  <div id="counter" class="counter">0</div>
+  <div class="goal">META: 3.000 HAMBÚRGUERES</div>
+  <div class="progress"><div id="progressBar"></div></div>
+  <div id="phrase" class="phrase">A CONTAGEM VAI COMEÇAR!</div>
+  <div id="celebration" class="celebration">
+    <strong id="celebrationTitle"></strong>
+    <small id="celebrationSubtitle"></small>
+  </div>
+</div>
+
+<div id="control" class="panel hidden">
+  <h1>HASHTAG<span>!</span></h1>
+  <p class="muted">PAINEL DE CONTROLE • FESTIVAL</p>
+
+  <div id="loginCard" class="panel-card">
+    <h2>Acesso administrativo</h2>
+    <input id="username" placeholder="Usuário" autocomplete="username">
+    <input id="password" type="password" placeholder="Senha" autocomplete="current-password">
+    <button class="action full" id="loginBtn">ENTRAR</button>
+    <p id="loginError" class="status"></p>
+  </div>
+
+  <div id="admin" class="hidden">
+    <div class="panel-card">
+      <p class="muted">TOTAL DE HAMBÚRGUERES</p>
+      <div id="panelTotal" class="panel-total">0</div>
+      <p class="muted">META: 3.000 • A CONTAGEM NÃO PARA NA META</p>
+    </div>
+
+    <div class="panel-card">
+      <h3>Adicionar vendas</h3>
+      <div class="grid">
+        <button class="action" data-delta="1">+1</button>
+        <button class="action" data-delta="5">+5</button>
+        <button class="action" data-delta="10">+10</button>
+        <button class="action" data-delta="50">+50</button>
+      </div>
+      <h3>Quantidade personalizada</h3>
+      <input id="customAmount" type="number" min="1" max="500" placeholder="Digite a quantidade">
+      <button id="customBtn" class="action full">ADICIONAR QUANTIDADE</button>
+    </div>
+
+    <div class="panel-card">
+      <h3>Correções</h3>
+      <div class="grid">
+        <button id="minusBtn" class="action danger">−1</button>
+        <button id="undoBtn" class="action secondary">DESFAZER</button>
+      </div>
+      <p class="muted">O desfazer reverte somente sua última operação nesta sessão.</p>
+    </div>
+
+    <button id="logoutBtn" class="action secondary full">SAIR DO PAINEL</button>
+  </div>
+  <p id="controlStatus" class="status">Conectando...</p>
+</div>
+
+<script>
+const SUPABASE_URL = "https://gpbtzxhulrsydextmlqj.supabase.co";
+const SUPABASE_KEY = "sb_publishable_A-5ckTc0wT87BU75QdbKPw_YFotR1wW";
+const FUNCTION_URL = SUPABASE_URL + "/functions/v1/festival-control";
+
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const params = new URLSearchParams(location.search);
+const isScreen = params.get("mode") === "screen";
+
+const screen = document.getElementById("screen");
+const control = document.getElementById("control");
+const counter = document.getElementById("counter");
+const phrase = document.getElementById("phrase");
+const panelTotal = document.getElementById("panelTotal");
+const progressBar = document.getElementById("progressBar");
+const controlStatus = document.getElementById("controlStatus");
+
+let actualTotal = 0;
+let displayedTotal = 0;
+let animationTimer = null;
+let token = sessionStorage.getItem("festival_token");
+let lastDelta = null;
+let celebrating = new Set();
+
+const milestones = {
+  1000:"A FOME COMEÇOU!",
+  1500:"METADE DO CAMINHO!",
+  2000:"ISSO VIROU UM FENÔMENO!",
+  2500:"FALTA POUCO!",
+  3000:"HASHTAG FEZ HISTÓRIA!"
+};
+
+const phrases = [
+  "A CHAPA NÃO PARA!",
+  "TEM FOME AÍ!",
+  "O CHEIRO JÁ CHAMOU!",
+  "ISSO É SÓ O COMEÇO!",
+  "A FILA TÁ ANDANDO!",
+  "MAIS UM PRA CONTA!",
+  "O FESTIVAL TÁ PEGANDO FOGO!",
+  "NÃO DÁ TEMPO NEM DE ESFRIAR!",
+  "A GALERA NÃO BRINCA EM SERVIÇO!",
+  "HAMBÚRGUER É COISA SÉRIA!"
+];
+
+function setStatus(message){
+  controlStatus.textContent = message;
+}
+
+function render(){
+  panelTotal.textContent = actualTotal.toLocaleString("pt-BR");
+  counter.textContent = displayedTotal.toLocaleString("pt-BR");
+  progressBar.style.width = Math.min(actualTotal / 3000 * 100,100) + "%";
+}
+
+function animateCount(){
+  if(animationTimer) return;
+  animationTimer = setInterval(()=>{
+    if(displayedTotal < actualTotal){
+      displayedTotal++;
+      render();
+      counter.classList.remove("bump");
+      void counter.offsetWidth;
+      counter.classList.add("bump");
+      checkMilestone(displayedTotal);
+    } else {
+      clearInterval(animationTimer);
+      animationTimer = null;
+    }
+  },1000);
+}
+
+function checkMilestone(value){
+  if(value > 0 && value % 50 === 0){
+    const index = Math.floor(value / 50) - 1;
+    phrase.textContent = phrases[index % phrases.length];
+  }
+  if(milestones[value] && !celebrating.has(value)){
+    celebrating.add(value);
+    showCelebration(value);
+  }
+}
+
+function showCelebration(value){
+  const box = document.getElementById("celebration");
+  document.getElementById("celebrationTitle").textContent = milestones[value];
+  document.getElementById("celebrationSubtitle").textContent =
+    value.toLocaleString("pt-BR") + " HAMBÚRGUERES VENDIDOS!";
+  box.classList.add("show");
+  if(value === 3000) createConfetti();
+  setTimeout(()=>box.classList.remove("show"),9000);
+}
+
+function createConfetti(){
+  const box = document.getElementById("celebration");
+  for(let i=0;i<90;i++){
+    const piece = document.createElement("i");
+    piece.className = "confetti";
+    piece.style.left = Math.random()*100 + "%";
+    piece.style.animationDelay = Math.random()*1.5 + "s";
+    piece.style.transform = "rotate(" + Math.random()*360 + "deg)";
+    box.appendChild(piece);
+    setTimeout(()=>piece.remove(),4500);
+  }
+}
+
+async function loadTotal(){
+  const {data,error} = await db.from("festival_counter")
+    .select("total").eq("id",true).single();
+  if(error){
+    setStatus("Erro ao carregar contador: " + error.message);
+    return;
+  }
+  actualTotal = Number(data.total) || 0;
+  displayedTotal = actualTotal;
+  render();
+  phrase.textContent = actualTotal === 0
+    ? "A CONTAGEM VAI COMEÇAR!"
+    : "O FESTIVAL ESTÁ AO VIVO!";
+}
+
+db.channel("festival-counter-live")
+  .on("postgres_changes",{
+    event:"UPDATE",
+    schema:"public",
+    table:"festival_counter",
+    filter:"id=eq.true"
+  },payload=>{
+    const next = Number(payload.new.total) || 0;
+    if(next > actualTotal){
+      actualTotal = next;
+      render();
+      if(isScreen) animateCount();
+    } else {
+      actualTotal = next;
+      displayedTotal = next;
+      render();
+    }
+  })
+  .subscribe(status=>{
+    if(status === "SUBSCRIBED" && !isScreen){
+      setStatus("Conectado em tempo real.");
+    }
+  });
+
+async function callFunction(body, useToken=true){
+  const headers = {"Content-Type":"application/json"};
+  if(useToken && token) headers.Authorization = "Bearer " + token;
+  const response = await fetch(FUNCTION_URL,{
+    method:"POST",headers,body:JSON.stringify(body)
+  });
+  const result = await response.json().catch(()=>({error:"Resposta inválida do servidor"}));
+  if(!response.ok) throw new Error(result.error || "Falha na operação");
+  return result;
+}
+
+async function login(){
+  const username = document.getElementById("username").value.trim();
+  const password = document.getElementById("password").value;
+  const error = document.getElementById("loginError");
+  error.textContent = "Verificando acesso...";
+  try{
+    const result = await callFunction({action:"login",username,password},false);
+    if(!result.token) throw new Error("O servidor não retornou um token.");
+    token = result.token;
+    sessionStorage.setItem("festival_token",token);
+    document.getElementById("loginCard").classList.add("hidden");
+    document.getElementById("admin").classList.remove("hidden");
+    error.textContent = "";
+    setStatus("Acesso autorizado.");
+  }catch(e){
+    error.textContent = e.message;
+  }
+}
+
+async function changeTotal(delta){
+  if(!Number.isInteger(delta) || delta === 0 || Math.abs(delta)>500) {
+    alert("Quantidade inválida. Use valores entre 1 e 500.");
+    return;
+  }
+  if(actualTotal + delta < 0){
+    alert("A contagem não pode ficar negativa.");
+    return;
+  }
+  try{
+    const result = await callFunction({action:"increment",delta});
+    lastDelta = delta;
+    if(typeof result.total === "number"){
+      actualTotal = result.total;
+      render();
+      if(isScreen && actualTotal > displayedTotal) animateCount();
+    }
+    setStatus("Alteração registrada com sucesso.");
+  }catch(e){
+    setStatus("Erro: " + e.message);
+    alert("Não foi possível atualizar: " + e.message);
+  }
+}
+
+document.getElementById("loginBtn").addEventListener("click",login);
+document.getElementById("password").addEventListener("keydown",e=>{
+  if(e.key==="Enter") login();
+});
+document.querySelectorAll("[data-delta]").forEach(button=>{
+  button.addEventListener("click",()=>changeTotal(Number(button.dataset.delta)));
+});
+document.getElementById("customBtn").addEventListener("click",()=>{
+  const amount = Number(document.getElementById("customAmount").value);
+  if(!Number.isInteger(amount) || amount<1 || amount>500){
+    alert("Digite uma quantidade entre 1 e 500.");
+    return;
+  }
+  changeTotal(amount);
+  document.getElementById("customAmount").value="";
+});
+document.getElementById("minusBtn").addEventListener("click",()=>changeTotal(-1));
+document.getElementById("undoBtn").addEventListener("click",()=>{
+  if(lastDelta === null){
+    alert("Nenhuma operação disponível para desfazer.");
+    return;
+  }
+  const inverse = -lastDelta;
+  if(actualTotal + inverse < 0){
+    alert("Não é possível desfazer: o total ficaria negativo.");
+    return;
+  }
+  changeTotal(inverse);
+  lastDelta = null;
+});
+document.getElementById("logoutBtn").addEventListener("click",()=>{
+  token = null;
+  lastDelta = null;
+  sessionStorage.removeItem("festival_token");
+  document.getElementById("admin").classList.add("hidden");
+  document.getElementById("loginCard").classList.remove("hidden");
+  document.getElementById("password").value="";
+  setStatus("Sessão encerrada.");
+});
+
+if(isScreen){
+  screen.classList.remove("hidden");
+  control.remove();
+}else{
+  control.classList.remove("hidden");
+  screen.remove();
+  if(token){
+    document.getElementById("loginCard").classList.add("hidden");
+    document.getElementById("admin").classList.remove("hidden");
+  }
+}
+
+loadTotal();
+</script>
+</body>
+</html>
