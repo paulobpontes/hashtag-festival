@@ -136,7 +136,7 @@ button{cursor:pointer}
 .action.secondary{background:#343434}
 .action.danger{background:#790d1a}
 .action.full{width:100%;margin-top:10px}
-.action:disabled{opacity:.45}
+.action:disabled{opacity:.45;cursor:not-allowed}
 input{width:100%;border:1px solid #444;background:#090909;color:white;padding:15px;border-radius:10px;margin:7px 0}
 .status{color:#aaa;text-align:center;font-size:13px;min-height:20px}
 
@@ -294,25 +294,35 @@ function renderDigits(value){
  const digits=String(Math.max(0,value)).padStart(6,"0");
  if(digits.length!==odometerLength)buildOdometer(digits.length);
  for(let i=0;i<digits.length;i++){
-  digitElements[i].style.transform=`translateY(-${Number(digits[i])*10}%)`;
+  if(digitElements[i]){
+   digitElements[i].style.transform=`translateY(-${Number(digits[i])*10}%)`;
+  }
  }
 }
 
+/* CORRIGIDO: verifica se os elementos existem antes de atualizar */
 function render(){
  renderDigits(displayedTotal);
- panelTotal.textContent=actualTotal.toLocaleString("pt-BR");
- document.getElementById("progressFill").style.width=
-  Math.min(actualTotal/3000*100,100)+"%";
+
+ if(panelTotal){
+  panelTotal.textContent=actualTotal.toLocaleString("pt-BR");
+ }
+
+ const progressFill=document.getElementById("progressFill");
+ if(progressFill){
+  progressFill.style.width=Math.min(actualTotal/3000*100,100)+"%";
+ }
 }
 
 function updatePhrase(value){
- if(value>0 && value%50===0){
+ if(screenPhrase && value>0 && value%50===0){
   screenPhrase.textContent=phrases[(value/50-1)%phrases.length];
  }
 }
 
 function createConfetti(){
  const box=document.getElementById("celebration");
+ if(!box)return;
  for(let i=0;i<100;i++){
   const particle=document.createElement("span");
   particle.className="particle";
@@ -328,6 +338,7 @@ function celebrate(value){
  if(!milestones[value]||celebrated.has(value))return;
  celebrated.add(value);
  const box=document.getElementById("celebration");
+ if(!box)return;
  document.getElementById("celebrationTitle").textContent=milestones[value];
  document.getElementById("celebrationSubtitle").textContent=
   value.toLocaleString("pt-BR")+" HAMBÚRGUERES VENDIDOS!";
@@ -365,7 +376,7 @@ async function loadTotal(){
   .select("total").eq("id",true).single();
 
  if(error){
-  if(isScreen)screenPhrase.textContent="NÃO FOI POSSÍVEL CARREGAR A CONTAGEM";
+  if(isScreen && screenPhrase)screenPhrase.textContent="NÃO FOI POSSÍVEL CARREGAR A CONTAGEM";
   else setStatus("Erro ao carregar: "+error.message);
   return;
  }
@@ -375,9 +386,11 @@ async function loadTotal(){
  displayedTotal=serverTotal;
  render();
 
- screenPhrase.textContent=actualTotal===0
-  ?"A CONTAGEM VAI COMEÇAR!"
-  :"O FESTIVAL ESTÁ AO VIVO!";
+ if(screenPhrase){
+  screenPhrase.textContent=actualTotal===0
+   ?"A CONTAGEM VAI COMEÇAR!"
+   :"O FESTIVAL ESTÁ AO VIVO!";
+ }
 }
 
 /* Atualiza a tela em tempo real */
@@ -438,8 +451,9 @@ async function changeTotal(delta){
   lastDelta=delta;
   if(typeof result.total==="number"){
    actualTotal=result.total;
+   displayedTotal=result.total;
    render();
-   if(isScreen&&actualTotal>displayedTotal)animateCount();
+   if(isScreen && actualTotal>displayedTotal)animateCount();
   }
   setStatus("Alteração registrada.");
  }catch(e){
@@ -499,10 +513,7 @@ if(isScreen){
  }
 }
 
-/* CORREÇÃO: cria os seis dígitos imediatamente */
 render();
-
-/* Depois busca o total verdadeiro no Supabase */
 loadTotal();
 </script>
 </body>
